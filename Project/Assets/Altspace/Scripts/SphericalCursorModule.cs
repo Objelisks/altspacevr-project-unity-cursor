@@ -7,6 +7,9 @@ public class SphericalCursorModule : MonoBehaviour {
 	// This is a scale factor that determines how much to scale down the cursor based on its collision distance.
 	public float DistanceScaleFactor;
 
+	// Amount to scale the dragging force by.
+	public float ForceScale = 20.0f;
+
 	// This is the layer mask to use when performing the ray cast for the objects.
 	// The furniture in the room is in layer 8, everything else is not.
 	private const int ColliderMask = (1 << 8);
@@ -27,7 +30,16 @@ public class SphericalCursorModule : MonoBehaviour {
 	private const float SphereRadius = 10.0f;
 
 	// Spherical coordinates to update each frame.
-	private Vector2 cursorSphericalCoords = new Vector2(0.0f, 0.0f);
+	private Vector2 CursorSphericalCoords = new Vector2(0.0f, 0.0f);
+
+	// World position to start force drag.
+	private Vector3 ForceStartPosition;
+
+	// Object to apply forces to.
+	private GameObject ForceSelection;
+
+	// Radius of the sphere to constrain the cursor to when applying drag force.
+	private float ForceRadius = 10.0f;
 
   void Awake() {
 		Cursor = transform.Find("Cursor").gameObject;
@@ -41,14 +53,15 @@ public class SphericalCursorModule : MonoBehaviour {
 		float horizontal = Input.GetAxis("Mouse X");
 		float vertical = Input.GetAxis("Mouse Y");
 
-		cursorSphericalCoords.x += horizontal * Sensitivity;
-		cursorSphericalCoords.y += vertical * Sensitivity;
+		CursorSphericalCoords.x += horizontal * Sensitivity;
+		CursorSphericalCoords.y += vertical * Sensitivity;
 
 		// Start ray cast from camera position, head in direction specified by spherical coordinates
 		Vector3 origin = transform.position;
-		Vector3 direction = Quaternion.AngleAxis(cursorSphericalCoords.x, Vector3.up)
-											* Quaternion.AngleAxis(cursorSphericalCoords.y, Vector3.left)
-											* Vector3.forward;
+		Vector3 direction = Quaternion.AngleAxis(CursorSphericalCoords.x, this.transform.up)
+											* Quaternion.AngleAxis(CursorSphericalCoords.y, -this.transform.right)
+											* this.transform.forward;
+		//direction.Normalize();
 
 		// Perform ray cast to find object cursor is pointing at.
 		RaycastHit cursorHit = new RaycastHit();
@@ -59,14 +72,34 @@ public class SphericalCursorModule : MonoBehaviour {
 		if (foundHit && cursorHit.collider != null) {
 			float distanceToObject = cursorHit.distance;
 			float scale = (distanceToObject * DistanceScaleFactor + 1.0f) / 2.0f;
-			
+
 			Selectable.CurrentSelection = cursorHit.collider.gameObject;
 			Cursor.transform.position = cursorHit.point;
 			Cursor.transform.localScale = new Vector3(scale, scale, scale);
 		} else {
 			Selectable.CurrentSelection = null;
-			Cursor.transform.localPosition = direction * SphereRadius;
+			Cursor.transform.position = origin + direction * SphereRadius;
 			Cursor.transform.localScale = DefaultCursorScale;
+		}
+
+		// Reset the selection on mouse up
+		if(Input.GetMouseButtonUp(0)) {
+				ForceSelection = null;
+		}
+
+		// Each frame if the mouse is held, apply force.
+		// The object we apply force to may not be the object under the cursor.
+		if(Input.GetMouseButton(0) && ForceSelection != null) {
+			Rigidbody body = ForceSelection.GetComponent<Rigidbody>();
+			Vector3 force = (transform.position + direction*ForceRadius)
+										- (ForceSelection.transform.position + ForceStartPosition);
+			body.AddForceAtPosition(force * ForceScale, ForceSelection.transform.position + ForceStartPosition);
+		}
+
+		if(Input.GetMouseButtonDown(0) && Selectable.CurrentSelection != null) {
+		ForceSelection = Selectable.CurrentSelection;
+			ForceStartPosition = cursorHit.point - ForceSelection.transform.position;
+			ForceRadius = cursorHit.distance;
 		}
 	}
 }

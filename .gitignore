@@ -6,7 +6,8 @@
 [Tt]emp/
 UnityGenerated/
 sysinfo.txt
- 
+*.meta
+
 # Visual Studio/MonoDevelop/XCode generated
 
 *.booproj
