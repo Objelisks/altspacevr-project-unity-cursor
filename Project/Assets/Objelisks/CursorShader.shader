@@ -5,12 +5,11 @@
 	}
 	SubShader {
 		// Draw the object as transparent, so that it doesn't do any fancy depth culling tricks.
-		Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
+		Tags {"Queue"="Overlay" "IgnoreProjector"="True" "RenderType"="Opaque"}
 		LOD 200
 
 		// Always draw object, ignoring existing depth values
 		ZTest Always
-		ZWrite On
 
 		CGPROGRAM
 

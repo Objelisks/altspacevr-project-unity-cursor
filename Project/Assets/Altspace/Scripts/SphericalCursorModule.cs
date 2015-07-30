@@ -41,6 +41,9 @@ public class SphericalCursorModule : MonoBehaviour {
 	// Radius of the sphere to constrain the cursor to when applying drag force.
 	private float ForceRadius = 10.0f;
 
+	// Maximum time to wait between clicks to register a double click.
+	private float DoubleClickDelay = 0.1f;
+
   void Awake() {
 		Cursor = transform.Find("Cursor").gameObject;
 		CursorMeshRenderer = Cursor.transform.GetComponentInChildren<MeshRenderer>();

@@ -7,8 +7,8 @@ Shader "GUI/3D Text Shader" {
 	}
 
 	SubShader {
-		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
-		Lighting Off Cull Off ZWrite Off Fog { Mode Off }
+		Tags { "RenderType"="Opaque" }
+		Lighting Off Cull Off ZWrite On Fog { Mode Off }
 		Blend SrcAlpha OneMinusSrcAlpha
 		Pass {
 			Color [_Color]
