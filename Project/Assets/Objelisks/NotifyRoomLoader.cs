@@ -11,7 +11,7 @@ public class NotifyRoomLoader : MonoBehaviour {
 	}
 
 	void OnTriggerEnter(Collider other) {
-		// If the player enters a new room
+		// If the player enters a new room, tell the room loader which room was entered
 		if(other.tag == "Player") {
 			roomLoader.SendMessage("SpawnRooms", this.transform.parent.gameObject);
 		}

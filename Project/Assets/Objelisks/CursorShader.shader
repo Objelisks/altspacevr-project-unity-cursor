@@ -4,7 +4,6 @@
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 	}
 	SubShader {
-		// Draw the object as transparent, so that it doesn't do any fancy depth culling tricks.
 		Tags {"Queue"="Overlay" "IgnoreProjector"="True" "RenderType"="Opaque"}
 		LOD 200
 
